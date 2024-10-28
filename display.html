@@ -50,7 +50,7 @@
                 <th>Bus Number</th>
                 <th>Arrival Time</th>
                 <th>Time Left</th>
-                <th>Departed</th>
+                <th>Status</th>
             </tr>
         </thead>
         <tbody id="tableBody">
@@ -59,7 +59,7 @@
     </table>
 
     <script>
-        // Function to load data from local storage and display it in the table
+        // Load bus data from local storage and display it in the table
         function loadBusData() {
             const tableBody = document.getElementById("tableBody");
             tableBody.innerHTML = ""; // Clear previous entries
@@ -85,45 +85,39 @@
                     timeCell.classList.add("time-left");
                     row.appendChild(timeCell);
 
-                    // Departed Cell (initially empty)
-                    const departedCell = document.createElement("td");
-                    departedCell.classList.add("departed");
-                    row.appendChild(departedCell);
+                    // Status Cell (initially empty)
+                    const statusCell = document.createElement("td");
+                    statusCell.classList.add("status");
+                    row.appendChild(statusCell);
 
                     // Add the row to the table body
                     tableBody.appendChild(row);
 
                     // Initialize countdown timer for each entry
-                    startCountdown(timeCell, departedCell, key, busData.startTime);
+                    startCountdown(timeCell, statusCell, key, busData.startTime);
                 }
             });
         }
 
         // Start a countdown timer for each bus entry
-        function startCountdown(timeCell, departedCell, storageKey, startTime) {
+        function startCountdown(timeCell, statusCell, storageKey, startTime) {
             const FIVE_MINUTES = 5 * 60 * 1000; // 5 minutes in milliseconds
-            const currentTime = new Date().getTime();
-            const timePassed = currentTime - startTime;
-            const timeLeft = FIVE_MINUTES - timePassed;
-
-            if (timeLeft <= 0) {
-                timeCell.textContent = ""; // Clear the countdown timer cell
-                departedCell.textContent = "Departed"; // Mark as departed
-                localStorage.removeItem(storageKey); // Remove from local storage
-                return;
-            }
-
-            // Update the countdown every second
             const timerInterval = setInterval(() => {
-                const minutes = Math.floor(timeLeft / 60000);
-                const seconds = Math.floor((timeLeft % 60000) / 1000);
-                timeCell.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                const currentTime = new Date().getTime();
+                const timePassed = currentTime - startTime;
+                const timeLeft = FIVE_MINUTES - timePassed;
 
+                // If timeLeft is <= 0, mark as departed and stop the countdown
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
                     timeCell.textContent = ""; // Clear the countdown timer cell
-                    departedCell.textContent = "Departed"; // Mark as departed
+                    statusCell.textContent = "Departed"; // Mark as departed
                     localStorage.removeItem(storageKey); // Remove from local storage
+                } else {
+                    // Calculate minutes and seconds left
+                    const minutes = Math.floor(timeLeft / 60000);
+                    const seconds = Math.floor((timeLeft % 60000) / 1000);
+                    timeCell.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
                 }
             }, 1000);
         }
