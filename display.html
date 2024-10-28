@@ -19,13 +19,6 @@
             font-size: 2em;
         }
 
-        /* Clock Styles */
-        #clock {
-            font-size: 1.5em;
-            margin-bottom: 20px;
-            color: #FDBA31; /* Yellow color for clock */
-        }
-
         /* Table Styles */
         table {
             margin: 0 auto;
@@ -50,7 +43,6 @@
     </style>
 </head>
 <body>
-    <div id="clock"></div>
     <h2>Bus Arrivals</h2>
     <table id="busTable">
         <thead>
@@ -67,16 +59,7 @@
     </table>
 
     <script>
-        // Update Clock
-        function updateClock() {
-            const clockElement = document.getElementById("clock");
-            const now = new Date();
-            clockElement.textContent = now.toLocaleTimeString();
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-
-        // Function to load data from local storage
+        // Function to load data from local storage and display it in the table
         function loadBusData() {
             const tableBody = document.getElementById("tableBody");
             tableBody.innerHTML = ""; // Clear previous entries
@@ -110,19 +93,30 @@
                     // Add the row to the table body
                     tableBody.appendChild(row);
 
-                    // Initialize countdown timer (5 minutes = 300 seconds)
-                    startCountdown(timeCell, departedCell, key);
+                    // Initialize countdown timer for each entry
+                    startCountdown(timeCell, departedCell, key, busData.startTime);
                 }
             });
         }
 
-        // Start a countdown timer for each new bus entry
-        function startCountdown(timeCell, departedCell, storageKey) {
-            let timeLeft = 300; // 5 minutes in seconds
+        // Start a countdown timer for each bus entry
+        function startCountdown(timeCell, departedCell, storageKey, startTime) {
+            const FIVE_MINUTES = 5 * 60 * 1000; // 5 minutes in milliseconds
+            const currentTime = new Date().getTime();
+            const timePassed = currentTime - startTime;
+            const timeLeft = FIVE_MINUTES - timePassed;
 
+            if (timeLeft <= 0) {
+                timeCell.textContent = ""; // Clear the countdown timer cell
+                departedCell.textContent = "Departed"; // Mark as departed
+                localStorage.removeItem(storageKey); // Remove from local storage
+                return;
+            }
+
+            // Update the countdown every second
             const timerInterval = setInterval(() => {
-                const minutes = Math.floor(timeLeft / 60);
-                const seconds = timeLeft % 60;
+                const minutes = Math.floor(timeLeft / 60000);
+                const seconds = Math.floor((timeLeft % 60000) / 1000);
                 timeCell.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
 
                 if (timeLeft <= 0) {
@@ -130,8 +124,6 @@
                     timeCell.textContent = ""; // Clear the countdown timer cell
                     departedCell.textContent = "Departed"; // Mark as departed
                     localStorage.removeItem(storageKey); // Remove from local storage
-                } else {
-                    timeLeft -= 1;
                 }
             }, 1000);
         }
