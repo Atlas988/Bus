@@ -59,7 +59,7 @@
     </table>
 
     <script>
-        // Load bus data from local storage and display it in the table
+        // Function to load bus data from local storage and display it in the table
         function loadBusData() {
             const tableBody = document.getElementById("tableBody");
             tableBody.innerHTML = ""; // Clear previous entries
@@ -102,6 +102,7 @@
         // Start a countdown timer for each bus entry
         function startCountdown(timeCell, statusCell, storageKey, startTime) {
             const FIVE_MINUTES = 5 * 60 * 1000; // 5 minutes in milliseconds
+
             const timerInterval = setInterval(() => {
                 const currentTime = new Date().getTime();
                 const timePassed = currentTime - startTime;
