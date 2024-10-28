@@ -8,69 +8,137 @@
         /* General Styles */
         body {
             font-family: Arial, sans-serif;
+            background-color: #6699CC; /* Custom blue background */
+            text-align: center;
+            color: #ffffff;
             margin: 0;
             padding: 20px;
-            background-color: #6699CC; /* Custom blue background */
-            color: #ffffff; /* White text for contrast */
         }
         h2 {
             color: #FDBA31; /* Custom yellow */
-            text-align: center;
+            font-size: 2em;
         }
+
+        /* Clock Styles */
+        #clock {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #FDBA31; /* Yellow color for clock */
+        }
+
+        /* Table Styles */
         table {
-            width: 100%;
+            margin: 0 auto;
             border-collapse: collapse;
-            margin-top: 20px;
+            width: 90%;
+            max-width: 700px;
+            color: #ffffff;
         }
         th, td {
-            border: 2px solid #FDBA31; /* Yellow border */
+            border: 1px solid #FDBA31; /* Yellow border */
             padding: 10px;
-            text-align: center; /* Center align text */
+            text-align: center;
         }
         th {
-            background-color: transparent; /* No background color */
-            color: #FDBA31; /* Yellow text */
+            color: #FDBA31;
+            font-weight: bold;
+            font-size: 1.1em;
         }
-       
+        td.departed {
+            color: #FF6347; /* Red for departed buses */
+        }
     </style>
 </head>
 <body>
+    <div id="clock"></div>
     <h2>Bus Arrivals</h2>
     <table id="busTable">
         <thead>
             <tr>
                 <th>Bus Number</th>
                 <th>Arrival Time</th>
+                <th>Time Left</th>
+                <th>Departed</th>
             </tr>
         </thead>
-        <tbody>
-            <!-- Bus arrival data will be injected here -->
+        <tbody id="tableBody">
+            <!-- Entries will be populated here -->
         </tbody>
     </table>
 
     <script>
-        function updateTable() {
-            const tableBody = document.getElementById("busTable").getElementsByTagName("tbody")[0];
-            tableBody.innerHTML = ''; // Clear existing table rows
+        // Update Clock
+        function updateClock() {
+            const clockElement = document.getElementById("clock");
+            const now = new Date();
+            clockElement.textContent = now.toLocaleTimeString();
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
 
-            // Retrieve all bus arrival data from local storage
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
+        // Function to load data from local storage
+        function loadBusData() {
+            const tableBody = document.getElementById("tableBody");
+            tableBody.innerHTML = ""; // Clear previous entries
+
+            // Loop through each bus data item in local storage
+            Object.keys(localStorage).forEach((key) => {
                 if (key.startsWith("busArrival_")) {
                     const busData = JSON.parse(localStorage.getItem(key));
-                    const row = tableBody.insertRow();
+                    const row = document.createElement("tr");
 
-                    const busNumberCell = row.insertCell(0);
-                    busNumberCell.textContent = busData.busNumber;
+                    // Bus Number Cell
+                    const busCell = document.createElement("td");
+                    busCell.textContent = busData.busNumber;
+                    row.appendChild(busCell);
 
-                    const arrivalTimeCell = row.insertCell(1);
-                    arrivalTimeCell.textContent = busData.arrivalTime;
+                    // Arrival Time Cell
+                    const arrivalCell = document.createElement("td");
+                    arrivalCell.textContent = busData.arrivalTime;
+                    row.appendChild(arrivalCell);
+
+                    // Countdown Timer Cell
+                    const timeCell = document.createElement("td");
+                    timeCell.classList.add("time-left");
+                    row.appendChild(timeCell);
+
+                    // Departed Cell (initially empty)
+                    const departedCell = document.createElement("td");
+                    departedCell.classList.add("departed");
+                    row.appendChild(departedCell);
+
+                    // Add the row to the table body
+                    tableBody.appendChild(row);
+
+                    // Initialize countdown timer (5 minutes = 300 seconds)
+                    startCountdown(timeCell, departedCell, key);
                 }
-            }
+            });
         }
 
-        // Update the table every second
-        setInterval(updateTable, 1000);
+        // Start a countdown timer for each new bus entry
+        function startCountdown(timeCell, departedCell, storageKey) {
+            let timeLeft = 300; // 5 minutes in seconds
+
+            const timerInterval = setInterval(() => {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timeCell.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timeCell.textContent = ""; // Clear the countdown timer cell
+                    departedCell.textContent = "Departed"; // Mark as departed
+                    localStorage.removeItem(storageKey); // Remove from local storage
+                } else {
+                    timeLeft -= 1;
+                }
+            }, 1000);
+        }
+
+        // Reload the data every second to update the timers
+        setInterval(loadBusData, 1000);
+        loadBusData();
     </script>
 </body>
 </html>
