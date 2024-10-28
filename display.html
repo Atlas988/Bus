@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus Arrival Display</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #6699CC; /* Custom blue background */
+            color: #ffffff; /* White text for contrast */
+        }
+        h2 {
+            color: #FDBA31; /* Custom yellow */
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 2px solid #FDBA31; /* Yellow border */
+            padding: 10px;
+            text-align: center; /* Center align text */
+        }
+        th {
+            background-color: transparent; /* No background color */
+            color: #FDBA31; /* Yellow text */
+        }
+       
+    </style>
+</head>
+<body>
+    <h2>Bus Arrivals</h2>
+    <table id="busTable">
+        <thead>
+            <tr>
+                <th>Bus Number</th>
+                <th>Arrival Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Bus arrival data will be injected here -->
+        </tbody>
+    </table>
+
+    <script>
+        function updateTable() {
+            const tableBody = document.getElementById("busTable").getElementsByTagName("tbody")[0];
+            tableBody.innerHTML = ''; // Clear existing table rows
+
+            // Retrieve all bus arrival data from local storage
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith("busArrival_")) {
+                    const busData = JSON.parse(localStorage.getItem(key));
+                    const row = tableBody.insertRow();
+
+                    const busNumberCell = row.insertCell(0);
+                    busNumberCell.textContent = busData.busNumber;
+
+                    const arrivalTimeCell = row.insertCell(1);
+                    arrivalTimeCell.textContent = busData.arrivalTime;
+                }
+            }
+        }
+
+        // Update the table every second
+        setInterval(updateTable, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus Arrival</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #6699CC; /* Custom blue background */
+            text-align: center;
+            color: #ffffff; /* White text for contrast */
+        }
+        h2 {
+            color: #FDBA31; /* Custom yellow */
+            font-size: 2em; /* Larger font size */
+        }
+
+        /* Flexbox for layout */
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start; /* Align items at the start */
+        }
+
+        /* Form Styles */
+        form {
+            margin-right: 20px; /* Space between form and iframe */
+            text-align: left; /* Align text left */
+            width: 300px; /* Fixed width for consistency */
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #FDBA31; /* Custom yellow */
+        }
+        input[type="text"] {
+            padding: 10px; /* Increased padding */
+            width: 100%;
+            margin-top: 5px;
+            border: 2px solid #FDBA31; /* Yellow border */
+            border-radius: 4px;
+            background-color: transparent; /* Match the background */
+            color: #FDBA31; /* Yellow text for visibility */
+            font-size: 1em; /* Font size */
+        }
+        button {
+            background-color: #FDBA31; /* Yellow background */
+            color: #6699CC; /* Blue text */
+            padding: 10px 15px;
+            border: none; /* No border */
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%; /* Full width buttons */
+            font-size: 1em; /* Font size */
+        }
+        button.clear {
+            border: 2px solid #FF0000; /* Red outline for clear button */
+            background-color: #FF0000; /* Transparent background */
+            color: #ffffff; /* Red text */
+        }
+        button.clear:hover {
+            background-color: #ff0000b6; /* Lighter yellow on hover */
+            color: #ffffff; /* Change text color to blue on hover */
+        }
+        button:hover {
+            background-color: #FFD700; /* Lighter yellow on hover */
+            color: #6699CC; /* Change text color to blue on hover */
+        }
+
+        /* Iframe Styles */
+        iframe {
+            border: 2px solid #FDBA31; /* Yellow border */
+            border-radius: 4px;
+            width: 100%; /* Full width */
+            max-width: 500px; /* Maximum width for the iframe */
+            height: 350px; /* Increased height for the iframe */
+        }
+    </style>
+</head>
+<body>
+    <h2>Enter Bus Arrival Information</h2>
+    <div class="container">
+        <form id="busForm" onsubmit="sendData(event)">
+            <label for="busNumber">Bus Number:</label>
+            <input type="text" id="busNumber" name="busNumber" placeholder="e.g., 42" required>
+            <label for="arrivalTime">Arrival Time:</label>
+            <input type="text" id="arrivalTime" name="arrivalTime" placeholder="e.g., 14:30" required>
+            <button type="submit">Submit</button>
+            <button type="button" class="clear" onclick="clearTable()">Clear Table</button>
+        </form>
+        <iframe id="displayFrame" src="display.html"></iframe>
+    </div>
+
+    <script>
+        function sendData(event) {
+            event.preventDefault();
+
+            const busNumber = document.getElementById("busNumber").value;
+            const arrivalTime = document.getElementById("arrivalTime").value;
+
+            const busData = { busNumber, arrivalTime };
+            const timestamp = new Date().getTime();
+            localStorage.setItem(`busArrival_${timestamp}`, JSON.stringify(busData));
+
+            document.getElementById("busForm").reset();
+            // Reload display page to show new data
+            document.getElementById("displayFrame").contentWindow.location.reload();
+        }
+
+        function clearTable() {
+            Object.keys(localStorage).forEach(key => {
+                if (key.startsWith("busArrival_")) {
+                    localStorage.removeItem(key);
+                }
+            });
+
+            document.getElementById("displayFrame").contentWindow.location.reload();
+        }
+    </script>
+</body>
+</html>
